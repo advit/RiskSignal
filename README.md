@@ -2,17 +2,17 @@
 
 ## AI Powered Risk Intelligence
 
-**RiskSignal** is a synthetic enterprise risk intelligence platform designed to detect emerging risk, understand the patterns behind it, preserve the evidence supporting the signal, and provide explainable investigation and recommendations.
+**RiskSignal** is a synthetic enterprise risk intelligence platform designed to detect meaningful signals, understand the patterns behind them, preserve the evidence supporting them, and provide explainable investigation and recommendations.
 
 The platform is designed to be **domain neutral**.
 
-Data Governance is the first implemented domain adapter. The same underlying architecture can eventually be extended to areas such as Technology Risk, Cybersecurity Risk, AI Risk, Operational Risk, and other domains where risk emerges from relationships between entities, observations, events, patterns, and context.
+Data Governance is the first implemented domain adapter. The same underlying architecture can eventually be extended to areas such as Technology Risk, Cybersecurity Risk, AI Risk, Operational Risk, and other domains where meaningful situations emerge from relationships between entities, observations, events, patterns, and context.
 
-> **The goal is not simply to identify a bad metric or a broken control. The goal is to understand when changing conditions become a meaningful risk, why the risk is emerging, and what evidence supports the assessment.**
+> **The goal is not simply to identify a bad metric or a broken control. The goal is to understand when changing conditions form a meaningful pattern, why that pattern may matter, and what evidence supports further attention or investigation.**
 
 ---
 
-## Why RiskSignal?
+# Why RiskSignal?
 
 Traditional monitoring systems often focus on individual measurements:
 
@@ -23,9 +23,9 @@ Traditional monitoring systems often focus on individual measurements:
 * Is an owner assigned?
 * Is a control operating?
 
-These measurements are useful, but individual measurements rarely tell the complete risk story.
+These measurements are useful, but individual measurements rarely tell the complete story.
 
-Risk often emerges from **relationships between multiple conditions over time**.
+Meaningful situations often emerge from **relationships between multiple conditions over time**.
 
 For example:
 
@@ -36,7 +36,7 @@ Loss of accountability
         +
 Critical business exposure
         ↓
-Emerging risk
+Meaningful risk signal
 ```
 
 RiskSignal therefore separates the problem into several stages:
@@ -50,6 +50,8 @@ Generate signals
         ↓
 Collect evidence
         ↓
+Determine significance
+        ↓
 Investigate
         ↓
 Recommend
@@ -57,9 +59,9 @@ Recommend
 Human decision
 ```
 
-The deterministic layers establish what happened and why a signal exists.
+The deterministic layers establish what happened, what patterns are present, and what evidence supports them.
 
-The AI layer is then given a **closed package of evidence** and asked to investigate that signal without independently inventing new evidence or changing the underlying risk assessment.
+The AI layer is then given a **closed package of evidence** and asked to investigate that signal without independently inventing new evidence or changing the underlying assessment.
 
 ---
 
@@ -89,12 +91,15 @@ RiskSignal is built around a domain neutral canonical model and a deterministic 
                  Evidence Collection
                          │
                          ▼
+             Significance Assessment
+                         │
+                         ▼
               Evidence Package
                  ┌───────┴───────┐
                  │               │
                  ▼               ▼
         Deterministic       AI Investigation
-        investigation              │
+        Investigation              │
                  │                  ▼
                  │             AI Validation
                  │                  │
@@ -106,15 +111,63 @@ RiskSignal is built around a domain neutral canonical model and a deterministic 
                     Human Decision
 ```
 
-The architecture deliberately separates **detection**, **evidence**, **AI investigation**, and **recommendation**.
+The architecture deliberately separates **detection**, **evidence**, **significance**, **AI investigation**, and **recommendation**.
 
-AI does not determine whether a risk signal exists.
+AI does not determine whether a signal exists.
 
 AI does not create the underlying evidence.
 
 AI does not replace the deterministic recommendation.
 
 AI investigates an already identified signal using evidence that has already been collected.
+
+---
+
+# Significance and Attention
+
+RiskSignal does not rely on a single universal risk score to determine whether every possible combination of conditions is significant.
+
+Instead, detected situations can progress through four levels representing the degree of attention warranted by the available evidence:
+
+### DETECTED
+
+RiskSignal has detected a trigger or noteworthy change.
+
+The situation is surfaced because it may be meaningful, but there is not yet enough evidence to suggest a broader developing situation.
+
+### EMERGING
+
+A pattern is emerging.
+
+Signals may be persisting, strengthening, or becoming connected to other indicators.
+
+**Emerging describes the development of a pattern. It does not mean "emerging risk" as a formal risk classification.**
+
+### INVESTIGATE
+
+The evidence is sufficiently meaningful that the situation should be prioritized for investigation.
+
+RiskSignal should explain what is driving the prioritization and provide the supporting evidence.
+
+### ATTENTION
+
+The evidence indicates that leadership attention is warranted now.
+
+This does not mean that earlier stages are hidden from leadership or require no response. Monitoring, review, communication, and other appropriate actions can occur at any stage.
+
+The four levels therefore represent a progression:
+
+```text
+Something was detected
+        ↓
+Something is developing
+        ↓
+This deserves focused investigation
+        ↓
+Leadership attention is warranted
+```
+
+The appropriate response remains separate from the significance tier.
 
 ---
 
@@ -257,7 +310,7 @@ Patterns describe **what the deterministic engine has identified**.
 
 ## Signal
 
-A risk relevant interpretation of a detected pattern.
+A risk relevant indication generated from a detected pattern.
 
 Examples:
 
@@ -265,7 +318,9 @@ Examples:
 * Missing relationship
 * Compound risk
 
-Signals contain severity and reference the pattern that caused them.
+Signals reference the pattern that caused them and contain deterministic attributes describing their type, significance, and relevant context.
+
+The term **signal** does not imply that every signal represents a confirmed risk. A signal is an indication that something meaningful may be developing and may warrant further attention.
 
 ---
 
@@ -466,6 +521,8 @@ Signals
    ↓
 Evidence
    ↓
+Significance
+   ↓
 Investigation
    ↓
 Recommendation
@@ -536,6 +593,12 @@ Compound risk signal
 
 Two measurements that represent the same underlying indicator family are not automatically treated as independent risks.
 
+The current MVP uses deterministic rules to identify meaningful combinations.
+
+Future versions may evaluate historical combinations to determine which combinations provide incremental intelligence and should be promoted to validated composite patterns.
+
+The objective is not to manually score every possible combination. It is to identify combinations that demonstrably add information.
+
 ---
 
 # Signals
@@ -550,7 +613,7 @@ Missing relationship
 Compound risk
 ```
 
-Severity is determined by deterministic rules and contextual attributes such as criticality.
+Signals describe what RiskSignal has detected. Their significance is assessed separately using deterministic logic and contextual attributes.
 
 The AI layer does not decide whether these signals exist.
 
@@ -725,7 +788,7 @@ The system is intended to support decision making rather than autonomously make 
 
 # Current Vertical Slice
 
-The current implementation demonstrates an end to end Data Governance risk scenario around:
+The current implementation demonstrates an end to end Data Governance scenario around:
 
 **DA047 — Credit Exposure Amount**
 
@@ -745,6 +808,8 @@ Pattern Detection
 Signal Generation
       ↓
 Evidence Construction
+      ↓
+Significance
       ↓
 Evidence Package
 ```
@@ -790,6 +855,7 @@ The AI boundary has now been established, but a live LLM is not yet connected.
 * Compound pattern detection
 * Signal generation
 * Constitutive and contextual evidence
+* Deterministic significance assessment
 * Deterministic investigation construction
 * Deterministic recommendation construction
 * Human decision recording
@@ -928,7 +994,7 @@ Data Governance
       ├── Cybersecurity Risk
       ├── AI Risk
       ├── Operational Risk
-      └── Other emerging risk domains
+      └── Other risk domains
 ```
 
 The objective is not to create a separate RiskSignal application for every risk domain.
@@ -999,9 +1065,10 @@ The development approach emphasizes:
 5. Separating detection from investigation
 6. Preserving evidence for explainability
 7. Treating AI output as untrusted until validated
-8. Keeping recommendations deterministic
-9. Keeping humans in the decision loop
-10. Starting with a small vertical slice before expanding the architecture
+8. Keeping significance assessment explicit and explainable
+9. Keeping recommendations deterministic
+10. Keeping humans in the decision loop
+11. Starting with a small vertical slice before expanding the architecture
 
 The project intentionally spends more effort on **intelligence, reasoning, evidence, evaluation, and learning** than on infrastructure.
 
