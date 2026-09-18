@@ -2,7 +2,7 @@
 
 ## AI Powered Risk Intelligence
 
-**RiskSignal** is a synthetic enterprise risk intelligence platform designed to detect meaningful signals, understand the patterns behind them, preserve the evidence supporting them, and provide explainable investigation and recommendations.
+**RiskSignal** is a synthetic enterprise risk intelligence platform designed to detect noteworthy changes, identify meaningful patterns, surface signals, preserve the evidence supporting them, and provide explainable investigation and recommendations.
 
 The platform is designed to be **domain neutral**.
 
@@ -44,7 +44,9 @@ RiskSignal therefore separates the problem into several stages:
 ```text
 Understand context
         ↓
-Detect patterns
+Detect noteworthy changes
+        ↓
+Identify patterns
         ↓
 Generate signals
         ↓
@@ -62,6 +64,10 @@ Human decision
 The deterministic layers establish what happened, what patterns are present, and what evidence supports them.
 
 The AI layer is then given a **closed package of evidence** and asked to investigate that signal without independently inventing new evidence or changing the underlying assessment.
+
+A useful way to think about the architecture is:
+
+> **Triggers are what RiskSignal notices. Patterns are what RiskSignal understands. Signals are what RiskSignal surfaces. Significance describes how much attention the signal warrants.**
 
 ---
 
@@ -82,8 +88,13 @@ RiskSignal is built around a domain neutral canonical model and a deterministic 
                   Context Engine
                          │
                          ▼
-                 Pattern Detection
+                  Detection Engine
                          │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+      Trigger Detection      Pattern Detection
+              │                     │
+              └──────────┬──────────┘
                          ▼
                   Signal Generation
                          │
@@ -94,7 +105,7 @@ RiskSignal is built around a domain neutral canonical model and a deterministic 
              Significance Assessment
                          │
                          ▼
-              Evidence Package
+                  Evidence Package
                  ┌───────┴───────┐
                  │               │
                  ▼               ▼
@@ -123,11 +134,108 @@ AI investigates an already identified signal using evidence that has already bee
 
 ---
 
+# Trigger, Pattern, and Signal
+
+These concepts are deliberately separated.
+
+## Trigger
+
+A **trigger** is a noteworthy deviation from expected behavior that causes the detection engine to evaluate whether something meaningful may be developing.
+
+A trigger could be:
+
+* An unexpected metric change
+* An anomaly
+* A missed expected event
+* An expired relationship
+* A control condition that is no longer satisfied
+* A deviation from an expected process
+* A change in an expected state
+
+A trigger does not necessarily become a pattern or a signal.
+
+For example:
+
+```text
+Timeliness
+    98%
+     ↓
+    91%
+     ↓
+Trigger
+"Unexpected deterioration"
+```
+
+The deviation may be worth recording without being significant enough to form a broader pattern.
+
+**Trigger is an intelligence concept, not a canonical object.**
+
+---
+
+## Pattern
+
+A **pattern** is a deterministic interpretation of one or more observations, triggers, relationships, or events that identifies a meaningful relationship, trend, or condition.
+
+For example:
+
+```text
+98%
+ ↓
+94%
+ ↓
+89%
+ ↓
+Pattern
+"Consecutive metric decline"
+```
+
+A pattern represents what the deterministic engine has identified in the available data.
+
+---
+
+## Signal
+
+A **signal** is a formal RiskSignal output generated from a detected pattern.
+
+For example:
+
+```text
+Consecutive metric decline
+            ↓
+       Signal Generation
+            ↓
+Emerging deterioration signal
+```
+
+A signal represents something that RiskSignal has determined is meaningful enough to surface.
+
+The term **signal** does not imply that every signal represents a confirmed risk. A signal is an indication that something meaningful may be developing and may warrant further attention or investigation.
+
+This separation means that:
+
+```text
+Trigger
+    ↓
+Something deviated
+
+Pattern
+    ↓
+Something meaningful is developing
+
+Signal
+    ↓
+RiskSignal formally surfaced it
+```
+
+Not every trigger becomes a pattern, and not every pattern necessarily needs to become a signal.
+
+---
+
 # Significance and Attention
 
 RiskSignal does not rely on a single universal risk score to determine whether every possible combination of conditions is significant.
 
-Instead, detected situations can progress through four levels representing the degree of attention warranted by the available evidence:
+Instead, detected signals can be assessed through four levels representing the degree of attention warranted by the available evidence:
 
 ### DETECTED
 
@@ -169,6 +277,8 @@ Leadership attention is warranted
 
 The appropriate response remains separate from the significance tier.
 
+Significance is an assessment of **attention**, not a universal risk severity score.
+
 ---
 
 # Domain Neutral Design
@@ -193,6 +303,8 @@ Decision
 ```
 
 These objects provide a common language for different risk domains.
+
+**Trigger is intentionally not included as a canonical object.** It is part of the detection logic that operates on canonical observations, events, relationships, and context.
 
 For example:
 
@@ -296,7 +408,7 @@ Events provide context around observations and patterns.
 
 ## Pattern
 
-A deterministic interpretation of observations, relationships, or events.
+A deterministic interpretation of one or more observations, triggers, relationships, or events that identifies a meaningful relationship, trend, or condition.
 
 Examples:
 
@@ -310,7 +422,7 @@ Patterns describe **what the deterministic engine has identified**.
 
 ## Signal
 
-A risk relevant indication generated from a detected pattern.
+A formal RiskSignal output generated from a detected pattern.
 
 Examples:
 
@@ -515,9 +627,11 @@ The pipeline is deliberately explicit:
 ```text
 Context
    ↓
-Patterns
+Trigger Detection
    ↓
-Signals
+Pattern Detection
+   ↓
+Signal Generation
    ↓
 Evidence
    ↓
@@ -527,6 +641,12 @@ Investigation
    ↓
 Recommendation
 ```
+
+Trigger detection and pattern detection are both part of the **Detection Engine**.
+
+A trigger does not automatically become a pattern, and a pattern does not automatically become a signal.
+
+---
 
 ## Context
 
@@ -538,6 +658,24 @@ This includes:
 * Relationships
 * Events
 * Entity attributes
+
+---
+
+## Triggers
+
+Trigger detection identifies noteworthy deviations from expected behavior.
+
+Examples include:
+
+* Unexpected metric deterioration
+* A relationship becoming inactive
+* An expected event not occurring
+* A control condition changing
+* An observation deviating from an expected trend
+
+A trigger can remain an isolated observation.
+
+The detection engine determines whether one or more triggers, observations, relationships, or events form a meaningful pattern.
 
 ---
 
@@ -613,7 +751,9 @@ Missing relationship
 Compound risk
 ```
 
-Signals describe what RiskSignal has detected. Their significance is assessed separately using deterministic logic and contextual attributes.
+Signals describe what RiskSignal has detected.
+
+Their significance is assessed separately using deterministic logic and contextual attributes.
 
 The AI layer does not decide whether these signals exist.
 
@@ -803,13 +943,15 @@ Canonical Projection
       ↓
 Temporal Context
       ↓
-Pattern Detection
+Detection Engine
       ↓
-Signal Generation
+Triggers
+      ↓
+Patterns
+      ↓
+Signals
       ↓
 Evidence Construction
-      ↓
-Significance
       ↓
 Evidence Package
 ```
@@ -817,6 +959,8 @@ Evidence Package
 The deterministic investigation and recommendation layers are also implemented.
 
 The AI boundary has now been established, but a live LLM is not yet connected.
+
+The significance model has been defined conceptually and will be implemented as a distinct deterministic assessment layer.
 
 ---
 
@@ -855,7 +999,6 @@ The AI boundary has now been established, but a live LLM is not yet connected.
 * Compound pattern detection
 * Signal generation
 * Constitutive and contextual evidence
-* Deterministic significance assessment
 * Deterministic investigation construction
 * Deterministic recommendation construction
 * Human decision recording
@@ -1062,13 +1205,14 @@ The development approach emphasizes:
 2. Building deterministic logic before probabilistic logic
 3. Generating underlying synthetic data rather than arbitrary scores
 4. Preserving temporal integrity
-5. Separating detection from investigation
-6. Preserving evidence for explainability
-7. Treating AI output as untrusted until validated
-8. Keeping significance assessment explicit and explainable
-9. Keeping recommendations deterministic
-10. Keeping humans in the decision loop
-11. Starting with a small vertical slice before expanding the architecture
+5. Separating trigger detection from pattern recognition
+6. Separating detection from investigation
+7. Preserving evidence for explainability
+8. Treating AI output as untrusted until validated
+9. Keeping significance assessment explicit and explainable
+10. Keeping recommendations deterministic
+11. Keeping humans in the decision loop
+12. Starting with a small vertical slice before expanding the architecture
 
 The project intentionally spends more effort on **intelligence, reasoning, evidence, evaluation, and learning** than on infrastructure.
 
@@ -1132,6 +1276,8 @@ The current test suite validates the deterministic intelligence pipeline and the
 The deterministic intelligence pipeline is implemented.
 
 The AI boundary is implemented.
+
+The significance model has been defined conceptually and will be implemented as a separate deterministic assessment layer.
 
 The next milestone is the **AI investigation and validation layer**, followed by connection to a local LLM.
 
