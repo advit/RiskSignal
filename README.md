@@ -462,33 +462,42 @@ The development approach emphasizes:
 
 ## Project Status
 
-**Current stage: Architecture and foundational modeling**
+**Current stage: Domain-neutral core + Data Governance adapter MVP**
+
+The runtime is a locally runnable Python package. Data Governance is the first domain adapter; it is not the platform core.
 
 Completed:
 
-* Initial RiskSignal problem definition
-* Initial ML problem
-* DQ dimensions and scoring methodology
-* DQ breach threshold
-* Temporal leakage principle
-* Authoritative-source concept
-* Semantic consistency concept
-* Composite maturity concept
-* Business exposure concept
-* Second-line governance concept
-* Audit and remediation context
-* Metric lifecycle context
+* Canonical model: Entity, Relationship, Observation, Event, Pattern, Signal, Evidence, Investigation, Recommendation, Decision
+* DuckDB persistence (`governance` and `canonical` schemas)
+* Data Governance tables and synthetic DA047 seed
+* Adapter projection into the canonical model
+* Domain-neutral Context, Pattern, Signal, and Evidence engines
+* Deterministic investigation / recommendation builders and human decision recording
+* Unit and end-to-end tests for an explainable DA047 signal
 
 Next:
 
-* Finalize the DA047 data model
-* Define underlying quality rules
-* Generate a small synthetic dataset
-* Calculate DQ measurements using Python and SQL
-* Build the first time-series dataset
-* Develop the initial ML experiment
-* Build the AI investigation layer
-* Demonstrate an end-to-end risk signal
+* Expand pattern coverage without adding domain-specific engines
+* Develop the initial ML experiment on canonical observations (temporal integrity preserved)
+* Add an isolated AI investigation interface on top of Evidence / Investigation
+
+Layout:
+
+```text
+src/risksignal/canonical/       # domain-neutral objects
+src/risksignal/intelligence/    # reusable engines
+src/risksignal/adapters/data_governance/
+src/risksignal/persistence/     # DuckDB
+tests/unit/  tests/integration/
+```
+
+Run tests from the repo root (with the project venv):
+
+```text
+pip install -e ".[dev]"
+pytest
+```
 
 ---
 
