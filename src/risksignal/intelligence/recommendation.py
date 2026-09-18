@@ -4,6 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from risksignal.canonical.models import Evidence, Recommendation, Signal
+from risksignal.intelligence.evidence import CONSTITUTIVE_ROLES
 
 
 class RecommendationBuilder:
@@ -15,25 +16,30 @@ class RecommendationBuilder:
         evidence: list[Evidence],
         created_at: datetime,
     ) -> Recommendation:
-        has_migration = any(
-            item.role == "contextual_event" and "migration" in item.description.lower()
-            for item in evidence
+        contextual = [item for item in evidence if item.role not in CONSTITUTIVE_ROLES]
+        has_migration_context = any(
+            "migration" in item.description.lower() for item in contextual
         )
-        metric = signal.attributes.get("metric_name", "the deteriorating metric")
-        if has_migration:
-            action = (
-                f"Increase monitoring frequency for {metric}, validate the in-progress migration control, "
-                "and prioritize upstream processing stability before the next reporting cycle."
-            )
-        else:
-            action = (
-                f"Increase monitoring frequency for {metric} and review ownership accountability "
-                "for the affected entity."
-            )
+        parts: list[str] = []
+        metric = signal.attributes.get("metric_name")
+        required = signal.attributes.get("required_relationship_type")
+        if signal.signal_type in {"emerging_deterioration", "compound_risk"}:
+            label = metric or "the deteriorating metric"
+            parts.append(f"Increase monitoring frequency for {label}.")
+            if has_migration_context:
+                parts.append(
+                    "Validate the in-progress migration control, "
+                    "and prioritize upstream processing stability before the next reporting cycle."
+                )
+        if signal.signal_type in {"missing_relationship", "compound_risk"}:
+            rel = required or "required"
+            parts.append(f"Restore an active '{rel}' relationship for the subject.")
+        if not parts:
+            parts.append("Review the constitutive evidence and confirm next action.")
         return Recommendation(
             recommendation_id=f"rec:{uuid4()}",
             investigation_id=investigation_id,
-            action=action,
+            action=" ".join(parts),
             rationale=signal.summary,
             created_at=created_at,
         )
