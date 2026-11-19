@@ -1,5 +1,6 @@
 from risksignal.intelligence.context import Context, ContextEngine
-from risksignal.intelligence.evidence import CONSTITUTIVE_ROLES, EvidenceEngine
+from risksignal.intelligence.evidence import EvidenceEngine
+from risksignal.intelligence.evidence_roles import CONSTITUTIVE_ROLES
 from risksignal.intelligence.investigation import InvestigationBuilder
 from risksignal.intelligence.pattern import (
     CompoundPatternComposer,

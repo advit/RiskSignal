@@ -4,7 +4,7 @@ from datetime import datetime
 from uuid import uuid4
 
 from risksignal.canonical.models import Evidence, Recommendation, Signal
-from risksignal.intelligence.evidence import CONSTITUTIVE_ROLES
+from risksignal.intelligence.evidence_roles import CONSTITUTIVE_ROLES
 
 
 class RecommendationBuilder:

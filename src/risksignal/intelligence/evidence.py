@@ -4,14 +4,7 @@ from uuid import uuid4
 
 from risksignal.canonical.models import Evidence, Pattern, Relationship, Signal
 from risksignal.intelligence.context import Context
-
-CONSTITUTIVE_ROLES = {
-    "detected_pattern",
-    "constituent_pattern",
-    "supporting_observation",
-    "expired_relationship",
-    "missing_required_relationship",
-}
+from risksignal.intelligence.evidence_roles import CONSTITUTIVE_ROLES
 
 
 class EvidenceEngine:

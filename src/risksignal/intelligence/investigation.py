@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from risksignal.canonical.models import Evidence, Investigation, Pattern, Signal
 from risksignal.intelligence.context import Context
-from risksignal.intelligence.evidence import CONSTITUTIVE_ROLES
+from risksignal.intelligence.evidence_roles import CONSTITUTIVE_ROLES
 
 
 class InvestigationBuilder:
