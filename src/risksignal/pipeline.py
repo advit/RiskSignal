@@ -52,6 +52,7 @@ def run_intelligence(
     subject_entity_id: str,
     as_of: datetime,
     detected_at: datetime | None = None,
+    required_relationship_type: str = "owner",
 ) -> PipelineResult:
     clock = detected_at or as_of
     entities = store.load_entities()
@@ -63,7 +64,9 @@ def run_intelligence(
         events=store.load_events(),
         as_of=as_of,
     )
-    patterns = PatternEngine().detect(context, detected_at=clock)
+    patterns = PatternEngine(
+        required_relationship_type=required_relationship_type
+    ).detect(context, detected_at=clock)
     signals = SignalEngine().emit(context=context, patterns=patterns, detected_at=clock)
 
     evidence_items: list[Evidence] = []
@@ -76,7 +79,9 @@ def run_intelligence(
     for signal in signals:
         store.save_signal(signal)
         pattern = pattern_by_id[signal.pattern_id]
-        collected = EvidenceEngine().collect(signal=signal, pattern=pattern, context=context)
+        collected = EvidenceEngine().collect(
+            signal=signal, pattern=pattern, patterns=patterns, context=context
+        )
         store.save_evidence(collected)
         evidence_items.extend(collected)
         investigation = InvestigationBuilder().build(
